@@ -1,0 +1,63 @@
+@import 'tailwindcss';
+
+/* --- ベースリセット / モバイル最適化 --- */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* iOS/Androidでのプルリフレッシュやバウンスを抑制 */
+  overscroll-behavior-y: none;
+}
+
+/* タップ時のハイライトを無効化（ネイティブアプリ風） */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* --- カスタムスクロールバー（旧 document.createElement('style') を置換） --- */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(16, 185, 129, 0.4);
+}
+
+.hide-scrollbar-arrows::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar-arrows {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* --- 軽量なモーダル登場アニメーション --- */
+@keyframes tc-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-zoom-in {
+  animation: tc-zoom-in 0.15s ease-out;
+}
