@@ -96,6 +96,65 @@ const requireKey = (apiKey: string): string => {
   return trimmed;
 };
 
+/** 利用可能なモデル（ListModels の結果） */
+export interface AvailableModel {
+  /** "models/" を除いたモデル ID（設定欄にそのまま入れられる） */
+  id: string;
+  displayName?: string;
+  /** 対応する生成メソッド（generateContent / predict など） */
+  methods: string[];
+}
+
+interface ListModelsResponse {
+  models?: Array<{
+    name: string;
+    displayName?: string;
+    supportedGenerationMethods?: string[];
+  }>;
+  error?: { message?: string };
+}
+
+/**
+ * APIキーで利用可能なモデルの一覧を取得する（一覧取得は無料）。
+ * 画像生成に関係しそうなモデル（名前に image/imagen を含む、または predict 対応）に絞って返す。
+ */
+export const listModels = async (
+  apiKey: string,
+): Promise<AvailableModel[]> => {
+  const key = requireKey(apiKey);
+  let response: Response;
+  try {
+    response = await fetch(
+      `${BASE_URL}?key=${encodeURIComponent(key)}&pageSize=1000`,
+    );
+  } catch {
+    throw new Error(
+      'ネットワークに接続できませんでした。通信環境をご確認ください。',
+    );
+  }
+  if (!response.ok) {
+    const data = (await response
+      .json()
+      .catch(() => ({}))) as ListModelsResponse;
+    throw new Error(friendlyMessage(response.status, data.error?.message));
+  }
+
+  const data = (await response.json()) as ListModelsResponse;
+  return (data.models ?? [])
+    .map((m) => ({
+      id: m.name.replace(/^models\//, ''),
+      displayName: m.displayName,
+      methods: m.supportedGenerationMethods ?? [],
+    }))
+    .filter(
+      (m) =>
+        m.id.includes('image') ||
+        m.id.includes('imagen') ||
+        m.methods.includes('predict'),
+    )
+    .sort((a, b) => a.id.localeCompare(b.id));
+};
+
 /** テキストから画像を生成（Imagen） */
 export const generateTextToImage = async (
   prompt: string,

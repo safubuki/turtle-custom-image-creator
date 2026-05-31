@@ -15,6 +15,7 @@ import {
 import { useSettings } from '../../hooks/useSettings';
 import { usePwaUpdate } from '../../hooks/usePwaUpdate';
 import { exportData, importData } from '../../lib/backup';
+import { listModels, type AvailableModel } from '../../lib/api';
 import {
   DEFAULT_TEXT_TO_IMAGE_MODEL,
   DEFAULT_IMAGE_TO_IMAGE_MODEL,
@@ -72,6 +73,36 @@ export function SettingsView({ onDataChanged }: SettingsViewProps) {
   const handleResetModels = () => {
     setT2iDraft(DEFAULT_TEXT_TO_IMAGE_MODEL);
     setI2iDraft(DEFAULT_IMAGE_TO_IMAGE_MODEL);
+  };
+
+  // --- 利用可能なモデルの取得（このキーで使えるモデルを確認） ---
+  const [availableModels, setAvailableModels] = useState<
+    AvailableModel[] | null
+  >(null);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState<string | null>(null);
+
+  const handleFetchModels = async () => {
+    setModelsError(null);
+    setModelsLoading(true);
+    try {
+      const list = await listModels(apiKey);
+      setAvailableModels(list);
+    } catch (e) {
+      setAvailableModels(null);
+      setModelsError(e instanceof Error ? e.message : '取得に失敗しました');
+    } finally {
+      setModelsLoading(false);
+    }
+  };
+
+  // モデルを適切な入力欄へ設定（predict は Imagen=テキスト→画像、それ以外は画像→画像）
+  const applyModel = (m: AvailableModel) => {
+    if (m.methods.includes('predict')) {
+      setT2iDraft(m.id);
+    } else {
+      setI2iDraft(m.id);
+    }
   };
 
   const isDirty = draft.trim() !== apiKey.trim();
@@ -307,6 +338,65 @@ export function SettingsView({ onDataChanged }: SettingsViewProps) {
               {DEFAULT_TEXT_TO_IMAGE_MODEL} / 画像→画像:{' '}
               {DEFAULT_IMAGE_TO_IMAGE_MODEL}）が使われます。
             </p>
+
+            {/* このキーで使えるモデルを確認 */}
+            <div className="border-t border-slate-100 pt-3">
+              <button
+                onClick={handleFetchModels}
+                disabled={!hasApiKey || modelsLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
+              >
+                {modelsLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                利用可能なモデルを取得
+              </button>
+              {!hasApiKey && (
+                <p className="mt-2 text-[11px] text-slate-400">
+                  先に APIキーを保存してください。
+                </p>
+              )}
+              {modelsError && (
+                <p className="mt-2 whitespace-pre-line rounded-xl bg-red-50 p-2 text-[11px] leading-relaxed text-red-500">
+                  {modelsError}
+                </p>
+              )}
+              {availableModels && (
+                <div className="mt-2">
+                  {availableModels.length === 0 ? (
+                    <p className="rounded-xl bg-slate-50 p-2 text-[11px] text-slate-500">
+                      このキーで使える画像系モデルが見つかりませんでした。無料枠では画像生成が提供されていない場合があります。
+                    </p>
+                  ) : (
+                    <>
+                      <p className="mb-1.5 text-[11px] text-slate-400">
+                        タップすると対応する欄に入ります（predict=テキスト→画像 /
+                        generateContent=画像→画像）。
+                      </p>
+                      <ul className="max-h-56 space-y-1 overflow-y-auto">
+                        {availableModels.map((m) => (
+                          <li key={m.id}>
+                            <button
+                              onClick={() => applyModel(m)}
+                              className="w-full rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-2 text-left transition-colors hover:border-emerald-300 hover:bg-emerald-50"
+                            >
+                              <span className="block break-all font-mono text-xs font-bold text-slate-700">
+                                {m.id}
+                              </span>
+                              <span className="text-[10px] text-slate-400">
+                                {m.methods.join(', ') || 'メソッド情報なし'}
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
