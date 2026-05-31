@@ -176,6 +176,16 @@ export function SettingsView({ onDataChanged }: SettingsViewProps) {
                 </button>
               )}
             </div>
+
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-200 py-2.5 text-xs font-bold text-slate-500 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-600"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              APIキーを取得する (Google AI Studio)
+            </a>
           </div>
         </section>
 
@@ -292,16 +302,6 @@ export function SettingsView({ onDataChanged }: SettingsViewProps) {
             </p>
           </div>
         </div>
-
-        <a
-          href="https://aistudio.google.com/app/apikey"
-          target="_blank"
-          rel="noreferrer noopener"
-          className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 text-sm font-bold text-slate-600 shadow-sm transition-colors hover:bg-slate-50"
-        >
-          <span>APIキーを取得する (Google AI Studio)</span>
-          <ExternalLink className="h-4 w-4 text-slate-400" />
-        </a>
       </div>
 
       <ConfirmDialog
