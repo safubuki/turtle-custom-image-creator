@@ -35,9 +35,9 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-[100dvh] justify-center bg-slate-100 font-sans text-slate-800">
-      {/* PC ではサイドバー + 広い本文、モバイルでは縦積みの 1 カラム */}
-      <div className="flex h-full w-full max-w-md flex-col overflow-hidden bg-white shadow-2xl md:max-w-6xl md:flex-row md:shadow-xl">
+    <div className="flex h-[100dvh] justify-center bg-slate-100 font-sans text-slate-800 md:items-center md:p-4">
+      {/* PC ではサイドバー + 広い本文（中央に浮くウィンドウ風）、モバイルでは全画面の 1 カラム */}
+      <div className="flex h-full w-full max-w-md flex-col overflow-hidden bg-white shadow-2xl md:h-full md:max-w-6xl md:flex-row md:rounded-3xl md:border md:border-slate-200 md:shadow-xl">
         <Sidebar active={activeTab} onChange={setActiveTab} />
 
         <div className="flex h-full min-w-0 flex-1 flex-col">

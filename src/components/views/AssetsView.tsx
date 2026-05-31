@@ -111,7 +111,7 @@ export function AssetsView({ assets, onSave, onDelete }: AssetsViewProps) {
         {filteredAssets.map((asset) => (
           <div
             key={asset.id}
-            className="relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
+            className="relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
           >
             <div className="hide-scrollbar-arrows relative flex h-32 snap-x gap-1 overflow-x-auto bg-slate-100 p-2">
               {asset.images.map((img, idx) => (

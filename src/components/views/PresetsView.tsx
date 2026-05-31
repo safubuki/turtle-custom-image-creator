@@ -62,11 +62,11 @@ export function PresetsView({
 
   return (
     <div className="relative flex h-full flex-col pb-24 md:pb-0">
-      <div className="custom-scrollbar space-y-3 overflow-y-auto p-4">
+      <div className="custom-scrollbar grid grid-cols-1 content-start gap-3 overflow-y-auto p-4 md:grid-cols-2">
         {presets.map((preset) => (
           <div
             key={preset.id}
-            className="relative flex flex-col rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+            className="relative flex flex-col rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
           >
             <div className="mb-2 flex items-start justify-between">
               <h3 className="text-lg font-bold text-slate-800">{preset.name}</h3>
@@ -109,7 +109,7 @@ export function PresetsView({
           </div>
         ))}
         {presets.length === 0 && (
-          <div className="py-12 text-center text-slate-400">
+          <div className="py-12 text-center text-slate-400 md:col-span-2">
             <Folder className="mx-auto mb-3 h-12 w-12 opacity-20" />
             <p className="text-sm font-medium">指示がありません</p>
           </div>

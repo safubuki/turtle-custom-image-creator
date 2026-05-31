@@ -23,6 +23,15 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* キーボード操作時（PC）のみフォーカスリングを表示。マウス/タッチでは出さない */
+button:focus-visible,
+a:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
 /* --- カスタムスクロールバー（旧 document.createElement('style') を置換） --- */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;

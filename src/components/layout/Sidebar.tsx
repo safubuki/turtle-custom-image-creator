@@ -1,6 +1,6 @@
-import { Layers } from 'lucide-react';
 import type { TabId } from '../../types';
 import { NAV_ITEMS } from './navItems';
+import { Logo } from './Logo';
 
 interface SidebarProps {
   active: TabId;
@@ -11,14 +11,11 @@ interface SidebarProps {
 export function Sidebar({ active, onChange }: SidebarProps) {
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-white md:flex">
-      <div className="flex items-center space-x-2 border-b border-slate-100 px-5 py-5">
-        <div className="rounded-lg bg-emerald-600 p-1.5">
-          <Layers className="h-5 w-5 text-emerald-50" />
-        </div>
-        <h1 className="text-base font-bold tracking-tight text-slate-800">
+      <div className="flex items-center gap-2.5 border-b border-slate-100 px-5 py-5">
+        <Logo className="h-9 w-9 rounded-xl shadow-sm" />
+        <h1 className="text-[15px] font-bold leading-tight tracking-tight text-slate-800">
           タートルイメージ
-          <br />
-          クリエイター
+          <span className="block text-emerald-600">クリエイター</span>
         </h1>
       </div>
 
@@ -31,12 +28,15 @@ export function Sidebar({ active, onChange }: SidebarProps) {
               key={item.id}
               onClick={() => onChange(item.id)}
               aria-current={isActive ? 'page' : undefined}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+              className={`relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
                 isActive
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
               }`}
             >
+              {isActive && (
+                <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-emerald-500" />
+              )}
               <Icon className="h-5 w-5" />
               {item.label}
             </button>
@@ -45,7 +45,7 @@ export function Sidebar({ active, onChange }: SidebarProps) {
       </nav>
 
       <p className="px-5 py-4 text-[10px] text-slate-300">
-        Turtle Custom Image Creator
+        Turtle Image Creator
       </p>
     </aside>
   );
