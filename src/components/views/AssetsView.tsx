@@ -107,13 +107,13 @@ export function AssetsView({ assets, onSave, onDelete }: AssetsViewProps) {
         </button>
       </div>
 
-      <div className="custom-scrollbar grid flex-1 grid-cols-2 gap-4 overflow-y-auto p-4 md:grid-cols-3">
+      <div className="custom-scrollbar grid flex-1 grid-cols-2 content-start gap-4 overflow-y-auto p-4 md:grid-cols-3">
         {filteredAssets.map((asset) => (
           <div
             key={asset.id}
             className="relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
           >
-            <div className="hide-scrollbar-arrows relative flex h-32 snap-x gap-1 overflow-x-auto bg-slate-100 p-2">
+            <div className="hide-scrollbar-arrows relative flex aspect-square snap-x gap-1 overflow-x-auto bg-slate-100 p-2">
               {asset.images.map((img, idx) => (
                 <img
                   key={idx}

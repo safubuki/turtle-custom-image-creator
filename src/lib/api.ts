@@ -64,9 +64,10 @@ export const generateTextToImage = async (
   prompt: string,
   aspectRatio: AspectRatio,
   apiKey: string,
+  model: string,
 ): Promise<string> => {
   const key = requireKey(apiKey);
-  const url = `${BASE_URL}/imagen-4.0-generate-001:predict?key=${encodeURIComponent(key)}`;
+  const url = `${BASE_URL}/${model}:predict?key=${encodeURIComponent(key)}`;
   const payload = {
     instances: { prompt },
     parameters: { sampleCount: 1, aspectRatio },
@@ -83,15 +84,16 @@ export const generateTextToImage = async (
   return `data:image/png;base64,${base64}`;
 };
 
-/** 参照画像をもとに画像を生成（Gemini image preview） */
+/** 参照画像をもとに画像を生成（Gemini image） */
 export const generateImageToImage = async (
   prompt: string,
   images: AssetImage[],
   aspectRatio: AspectRatio,
   apiKey: string,
+  model: string,
 ): Promise<string> => {
   const key = requireKey(apiKey);
-  const url = `${BASE_URL}/gemini-2.5-flash-image-preview:generateContent?key=${encodeURIComponent(key)}`;
+  const url = `${BASE_URL}/${model}:generateContent?key=${encodeURIComponent(key)}`;
 
   const parts: Array<
     | { text: string }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import type { TabId } from './types';
 import { useLibrary } from './hooks/useLibrary';
+import { useGenerateSession } from './hooks/useGenerateSession';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { BottomNav } from './components/layout/BottomNav';
@@ -22,6 +23,9 @@ export default function App() {
     savePreset,
     deletePreset,
   } = useLibrary();
+
+  // 生成ページの状態は App 直下で保持し、タブ切替で失われないようにする
+  const generateSession = useGenerateSession();
 
   if (isLoading) {
     return (
@@ -46,7 +50,12 @@ export default function App() {
           <main className="relative flex-1 overflow-hidden bg-slate-50">
             <div className="mx-auto h-full w-full max-w-3xl">
               {activeTab === 'generate' && (
-                <GenerateView presets={presets} assets={assets} />
+                <GenerateView
+                  presets={presets}
+                  assets={assets}
+                  session={generateSession}
+                  onManageAssets={() => setActiveTab('assets')}
+                />
               )}
               {activeTab === 'assets' && (
                 <AssetsView

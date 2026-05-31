@@ -10,10 +10,15 @@ import {
   Upload,
   RefreshCw,
   Loader2,
+  Cpu,
 } from 'lucide-react';
 import { useSettings } from '../../hooks/useSettings';
 import { usePwaUpdate } from '../../hooks/usePwaUpdate';
 import { exportData, importData } from '../../lib/backup';
+import {
+  DEFAULT_TEXT_TO_IMAGE_MODEL,
+  DEFAULT_IMAGE_TO_IMAGE_MODEL,
+} from '../../lib/models';
 import { PasswordInput } from '../ui/PasswordInput';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 
@@ -23,7 +28,15 @@ interface SettingsViewProps {
 }
 
 export function SettingsView({ onDataChanged }: SettingsViewProps) {
-  const { apiKey, hasApiKey, saveApiKey, clearApiKey } = useSettings();
+  const {
+    apiKey,
+    hasApiKey,
+    saveApiKey,
+    clearApiKey,
+    textToImageModel,
+    imageToImageModel,
+    saveModels,
+  } = useSettings();
   const [draft, setDraft] = useState(apiKey);
   const [saved, setSaved] = useState(false);
 
@@ -31,6 +44,35 @@ export function SettingsView({ onDataChanged }: SettingsViewProps) {
   useEffect(() => {
     setDraft(apiKey);
   }, [apiKey]);
+
+  // --- AIモデル設定 ---
+  const [t2iDraft, setT2iDraft] = useState(textToImageModel);
+  const [i2iDraft, setI2iDraft] = useState(imageToImageModel);
+  const [modelSaved, setModelSaved] = useState(false);
+
+  useEffect(() => {
+    setT2iDraft(textToImageModel);
+  }, [textToImageModel]);
+  useEffect(() => {
+    setI2iDraft(imageToImageModel);
+  }, [imageToImageModel]);
+
+  const modelsDirty =
+    t2iDraft.trim() !== textToImageModel || i2iDraft.trim() !== imageToImageModel;
+
+  const handleSaveModels = async () => {
+    await saveModels({
+      textToImageModel: t2iDraft,
+      imageToImageModel: i2iDraft,
+    });
+    setModelSaved(true);
+    window.setTimeout(() => setModelSaved(false), 2000);
+  };
+
+  const handleResetModels = () => {
+    setT2iDraft(DEFAULT_TEXT_TO_IMAGE_MODEL);
+    setI2iDraft(DEFAULT_IMAGE_TO_IMAGE_MODEL);
+  };
 
   const isDirty = draft.trim() !== apiKey.trim();
 
@@ -186,6 +228,85 @@ export function SettingsView({ onDataChanged }: SettingsViewProps) {
               <ExternalLink className="h-3.5 w-3.5" />
               APIキーを取得する (Google AI Studio)
             </a>
+          </div>
+        </section>
+
+        {/* ===== AIモデル設定 ===== */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-emerald-100 p-2">
+              <Cpu className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-800">AIモデル</h2>
+              <p className="text-xs text-slate-500">
+                使用するモデル名（変更時のみ編集してください）
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div className="space-y-1">
+              <label className="ml-1 text-xs font-bold uppercase text-slate-500">
+                テキスト→画像（素材なし）
+              </label>
+              <input
+                type="text"
+                value={t2iDraft}
+                onChange={(e) => setT2iDraft(e.target.value)}
+                placeholder={DEFAULT_TEXT_TO_IMAGE_MODEL}
+                spellCheck={false}
+                autoCapitalize="none"
+                autoCorrect="off"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="ml-1 text-xs font-bold uppercase text-slate-500">
+                画像→画像（素材あり）
+              </label>
+              <input
+                type="text"
+                value={i2iDraft}
+                onChange={(e) => setI2iDraft(e.target.value)}
+                placeholder={DEFAULT_IMAGE_TO_IMAGE_MODEL}
+                spellCheck={false}
+                autoCapitalize="none"
+                autoCorrect="off"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveModels}
+                disabled={!modelsDirty}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 font-bold text-white transition-all ${
+                  !modelsDirty
+                    ? 'cursor-not-allowed bg-slate-300'
+                    : 'bg-emerald-500 shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 active:scale-95'
+                }`}
+              >
+                {modelSaved ? (
+                  <>
+                    <Check className="h-5 w-5" /> 保存しました
+                  </>
+                ) : (
+                  '保存する'
+                )}
+              </button>
+              <button
+                onClick={handleResetModels}
+                className="rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-50"
+              >
+                既定に戻す
+              </button>
+            </div>
+            <p className="text-[11px] leading-relaxed text-slate-400">
+              空欄で保存すると既定値（テキスト→画像:{' '}
+              {DEFAULT_TEXT_TO_IMAGE_MODEL} / 画像→画像:{' '}
+              {DEFAULT_IMAGE_TO_IMAGE_MODEL}）が使われます。
+            </p>
           </div>
         </section>
 
