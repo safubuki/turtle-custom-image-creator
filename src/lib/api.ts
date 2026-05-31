@@ -19,6 +19,28 @@ interface FetchJson {
   }>;
 }
 
+/** HTTP ステータスから日本語の分かりやすいメッセージを組み立てる */
+const friendlyMessage = (status: number, apiMessage?: string): string => {
+  switch (status) {
+    case 429:
+      return (
+        'APIの利用上限（クォータ）に達しました。\n' +
+        '画像生成は無料枠では使えないことが多く、その場合は Google AI Studio / Google Cloud で' +
+        '請求（課金）を有効化する必要があります。一時的な制限の場合は、しばらく待ってから再度お試しください。'
+      );
+    case 403:
+      return 'アクセスが拒否されました。APIキーが無効か、このモデルの利用権限がない可能性があります。設定のAPIキー・モデル名をご確認ください。';
+    case 404:
+      return 'モデルが見つかりません。設定の「AIモデル」でモデル名をご確認ください。';
+    case 400:
+      return `リクエストに問題があります: ${apiMessage || '入力内容をご確認ください'}`;
+    default:
+      return `エラー: ${status} - ${apiMessage || '不明なエラー'}`;
+  }
+};
+
+const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 const fetchWithRetry = async (
   url: string,
   options: RequestInit,
@@ -28,24 +50,39 @@ const fetchWithRetry = async (
   let lastError: unknown;
 
   for (let i = 0; i < retries; i++) {
+    let response: Response;
     try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        const errorData = (await response.json().catch(() => ({}))) as FetchJson;
-        throw new Error(
-          `エラー: ${response.status} - ${errorData.error?.message || '不明なエラー'}`,
-        );
-      }
-      return (await response.json()) as FetchJson;
-    } catch (error) {
-      lastError = error;
+      response = await fetch(url, options);
+    } catch (networkError) {
+      // ネットワークエラーのみリトライ対象
+      lastError = networkError;
       if (i < retries - 1) {
-        await new Promise((res) => setTimeout(res, delays[i]));
+        await wait(delays[i]);
+        continue;
       }
+      throw new Error(
+        'ネットワークに接続できませんでした。通信環境をご確認ください。',
+      );
+    }
+
+    if (response.ok) return (await response.json()) as FetchJson;
+
+    const errorData = (await response.json().catch(() => ({}))) as FetchJson;
+    const message = friendlyMessage(response.status, errorData.error?.message);
+
+    // 4xx（クォータ超過・権限・不正リクエスト等）は待っても回復しないため即終了。
+    // 無駄なリトライで残りのクォータを消費しないようにする。
+    if (response.status < 500) {
+      throw new Error(message);
+    }
+
+    // 5xx（サーバー側の一時障害）はリトライ
+    lastError = new Error(message);
+    if (i < retries - 1) {
+      await wait(delays[i]);
     }
   }
 
-  // ループを抜けた = 全リトライ失敗
   throw lastError instanceof Error
     ? lastError
     : new Error('通信に失敗しました');

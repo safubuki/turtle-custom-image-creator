@@ -394,9 +394,19 @@ export function GenerateView({
             )}
           </div>
           {error && (
-            <p className="rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-500">
-              {error}
-            </p>
+            <div className="space-y-2 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-500">
+              <p className="whitespace-pre-line leading-relaxed">{error}</p>
+              {error.includes('クォータ') && (
+                <a
+                  href="https://ai.google.dev/gemini-api/docs/rate-limits"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-red-600 underline"
+                >
+                  利用枠・課金について確認する
+                </a>
+              )}
+            </div>
           )}
         </div>
 
